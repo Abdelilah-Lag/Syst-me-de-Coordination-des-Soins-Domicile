@@ -1,0 +1,659 @@
+{
+  "info": {
+    "name": "Projet 6 - TEST FINAL COMPLET (Soins à Domicile)",
+    "description": "Collection de test globale générée à partir du code source.\nScénario : 3 patients + 2 soignants + optimisation tournée + suivi temps réel + facturation.\nAuteurs: Costo Aya & Lagribi Abdelilah — ENSAM INDIA S4 2025/2026",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "patient_url",   "value": "http://localhost:8081" },
+    { "key": "caregiver_url","value": "http://localhost:8082" },
+    { "key": "visit_url",    "value": "http://localhost:8083" },
+    { "key": "tracking_url", "value": "http://localhost:8084" },
+    { "key": "billing_url",  "value": "http://localhost:8085" },
+    { "key": "p1_id", "value": "" },
+    { "key": "p2_id", "value": "" },
+    { "key": "p3_id", "value": "" },
+    { "key": "c1_id", "value": "" },
+    { "key": "c2_id", "value": "" },
+    { "key": "v1_id", "value": "" },
+    { "key": "v2_id", "value": "" },
+    { "key": "v3_id", "value": "" },
+    { "key": "b1_id", "value": "" },
+    { "key": "b2_id", "value": "" }
+  ],
+  "item": [
+
+    {
+      "name": "00 - Health Checks",
+      "item": [
+        {
+          "name": "Patient Service UP",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Patient Service UP', () => pm.response.to.have.status(200));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8081/actuator/health"}
+        },
+        {
+          "name": "Caregiver Service UP",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Caregiver Service UP', () => pm.response.to.have.status(200));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8082/actuator/health"}
+        },
+        {
+          "name": "Visit Service UP",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Visit Service UP', () => pm.response.to.have.status(200));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8083/actuator/health"}
+        },
+        {
+          "name": "Tracking Service UP",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Tracking Service UP', () => pm.response.to.have.status(200));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8084/actuator/health"}
+        },
+        {
+          "name": "Billing Service UP",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Billing Service UP', () => pm.response.to.have.status(200));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8085/actuator/health"}
+        }
+      ]
+    },
+
+    {
+      "name": "01 - Patients",
+      "item": [
+        {
+          "name": "Créer Patient 1 - Benali Hassan (Diabète)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "const j = pm.response.json();",
+            "pm.test('ID présent', () => pm.expect(j.id).to.exist);",
+            "pm.collectionVariables.set('p1_id', j.id);",
+            "console.log('Patient 1 ID =', j.id);"
+          ]}}],
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8081/patients",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"nom\": \"Benali\",\n  \"prenom\": \"Hassan\",\n  \"dateNaissance\": \"1950-03-15\",\n  \"telephone\": \"0661234567\",\n  \"email\": \"hassan.benali@email.com\",\n  \"adresse\": \"12 Rue Mohamed V, Casablanca\",\n  \"latitude\": 33.5731,\n  \"longitude\": -7.5898,\n  \"niveauDependance\": \"DEPENDANT\",\n  \"pathologies\": \"Diabète type 2, Hypertension\",\n  \"besoinsSpecifiques\": \"Injection insuline quotidienne, surveillance tension\",\n  \"contraintes\": \"Visites uniquement matin\",\n  \"nomAidant\": \"Benali Fatima\",\n  \"telephoneAidant\": \"0662345678\"\n}"}
+          }
+        },
+        {
+          "name": "Créer Patient 2 - Alaoui Fatima (Post-op)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "const j = pm.response.json();",
+            "pm.test('ID présent', () => pm.expect(j.id).to.exist);",
+            "pm.collectionVariables.set('p2_id', j.id);",
+            "console.log('Patient 2 ID =', j.id);"
+          ]}}],
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8081/patients",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"nom\": \"Alaoui\",\n  \"prenom\": \"Fatima\",\n  \"dateNaissance\": \"1965-07-22\",\n  \"telephone\": \"0673456789\",\n  \"email\": \"fatima.alaoui@email.com\",\n  \"adresse\": \"45 Boulevard Anfa, Casablanca\",\n  \"latitude\": 33.5900,\n  \"longitude\": -7.6100,\n  \"niveauDependance\": \"SEMI_DEPENDANT\",\n  \"pathologies\": \"Post-opératoire genou, Arthrose\",\n  \"besoinsSpecifiques\": \"Pansement quotidien, kinésithérapie\",\n  \"contraintes\": \"Disponible toute la journée\",\n  \"nomAidant\": \"Alaoui Youssef\",\n  \"telephoneAidant\": \"0674567890\"\n}"}
+          }
+        },
+        {
+          "name": "Créer Patient 3 - El Idrissi Omar (Cardiaque)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "const j = pm.response.json();",
+            "pm.test('ID présent', () => pm.expect(j.id).to.exist);",
+            "pm.collectionVariables.set('p3_id', j.id);",
+            "console.log('Patient 3 ID =', j.id);"
+          ]}}],
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8081/patients",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"nom\": \"El Idrissi\",\n  \"prenom\": \"Omar\",\n  \"dateNaissance\": \"1942-11-05\",\n  \"telephone\": \"0685678901\",\n  \"email\": \"omar.elidrissi@email.com\",\n  \"adresse\": \"8 Rue Ibn Battouta, Casablanca\",\n  \"latitude\": 33.5600,\n  \"longitude\": -7.5700,\n  \"niveauDependance\": \"TRES_DEPENDANT\",\n  \"pathologies\": \"Insuffisance cardiaque, Fibrillation auriculaire\",\n  \"besoinsSpecifiques\": \"Surveillance ECG, gestion anticoagulants\",\n  \"contraintes\": \"Visites matin uniquement\",\n  \"nomAidant\": \"El Idrissi Khadija\",\n  \"telephoneAidant\": \"0686789012\"\n}"}
+          }
+        },
+        {
+          "name": "GET Lister tous les patients",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Au moins 3 patients', () => pm.expect(pm.response.json().length).to.be.at.least(3));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8081/patients"}
+        },
+        {
+          "name": "GET Patient 1 par ID",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Nom = Benali', () => pm.expect(pm.response.json().nom).to.equal('Benali'));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8081/patients/{{p1_id}}"}
+        },
+        {
+          "name": "GET Rechercher patient - Alaoui",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Résultat non vide', () => pm.expect(pm.response.json().length).to.be.at.least(1));"
+          ]}}],
+          "request": {
+            "method":"GET",
+            "url": {
+              "raw": "http://localhost:8081/patients/search?query=Alaoui",
+              "query": [{"key":"query","value":"Alaoui"}]
+            }
+          }
+        },
+        {
+          "name": "PUT Modifier Patient 1 (TRES_DEPENDANT)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Niveau mis à jour', () => pm.expect(pm.response.json().niveauDependance).to.equal('TRES_DEPENDANT'));"
+          ]}}],
+          "request": {
+            "method":"PUT",
+            "url":"http://localhost:8081/patients/{{p1_id}}",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"nom\": \"Benali\",\n  \"prenom\": \"Hassan\",\n  \"dateNaissance\": \"1950-03-15\",\n  \"telephone\": \"0661234567\",\n  \"email\": \"hassan.benali@email.com\",\n  \"adresse\": \"12 Rue Mohamed V, Casablanca\",\n  \"latitude\": 33.5731,\n  \"longitude\": -7.5898,\n  \"niveauDependance\": \"TRES_DEPENDANT\",\n  \"pathologies\": \"Diabète type 2, Hypertension\",\n  \"besoinsSpecifiques\": \"Injection insuline quotidienne, surveillance tension\",\n  \"contraintes\": \"Visites uniquement matin\",\n  \"nomAidant\": \"Benali Fatima\",\n  \"telephoneAidant\": \"0662345678\",\n  \"statut\": \"ACTIF\"\n}"}
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "02 - Soignants",
+      "item": [
+        {
+          "name": "Créer Soignant 1 - Amrani Sara (Infirmière)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "const j = pm.response.json();",
+            "pm.test('ID présent', () => pm.expect(j.id).to.exist);",
+            "pm.collectionVariables.set('c1_id', j.id);",
+            "console.log('Soignant 1 ID =', j.id);"
+          ]}}],
+          "request": {
+            "method":"POST",
+            "url":"http://localhost:8082/caregivers",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"nom\": \"Amrani\",\n  \"prenom\": \"Sara\",\n  \"typeSoignant\": \"INFIRMIER\",\n  \"telephone\": \"0671234567\",\n  \"email\": \"sara.amrani@soins.ma\",\n  \"adresseBase\": \"Centre de Soins, Quartier Maarif, Casablanca\",\n  \"latitudeBase\": 33.5850,\n  \"longitudeBase\": -7.6200,\n  \"competences\": [\"Soins infirmiers\", \"Injection IV\", \"Diabète\"],\n  \"capaciteVisitesParJour\": 8\n}"}
+          }
+        },
+        {
+          "name": "Créer Soignant 2 - Mansouri Karim (Aide-soignant)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "const j = pm.response.json();",
+            "pm.test('ID présent', () => pm.expect(j.id).to.exist);",
+            "pm.collectionVariables.set('c2_id', j.id);",
+            "console.log('Soignant 2 ID =', j.id);"
+          ]}}],
+          "request": {
+            "method":"POST",
+            "url":"http://localhost:8082/caregivers",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"nom\": \"Mansouri\",\n  \"prenom\": \"Karim\",\n  \"typeSoignant\": \"AIDE_SOIGNANT\",\n  \"telephone\": \"0682345678\",\n  \"email\": \"karim.mansouri@soins.ma\",\n  \"adresseBase\": \"Clinique Hay Hassani, Casablanca\",\n  \"latitudeBase\": 33.5650,\n  \"longitudeBase\": -7.6350,\n  \"competences\": [\"Pansements\", \"Aide à la mobilité\", \"Surveillance constantes\"],\n  \"capaciteVisitesParJour\": 6\n}"}
+          }
+        },
+        {
+          "name": "GET Lister tous les soignants",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Au moins 2 soignants', () => pm.expect(pm.response.json().length).to.be.at.least(2));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8082/caregivers"}
+        },
+        {
+          "name": "GET Soignants disponibles",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "console.log('Disponibles:', pm.response.json().length);"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8082/caregivers/available"}
+        },
+        {
+          "name": "GET Soignant 1 par ID",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Nom = Amrani', () => pm.expect(pm.response.json().nom).to.equal('Amrani'));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8082/caregivers/{{c1_id}}"}
+        },
+        {
+          "name": "PUT Modifier Soignant 2 (capacité 8/j)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Capacité mise à jour', () => pm.expect(pm.response.json().capaciteVisitesParJour).to.equal(8));"
+          ]}}],
+          "request": {
+            "method":"PUT",
+            "url":"http://localhost:8082/caregivers/{{c2_id}}",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"nom\": \"Mansouri\",\n  \"prenom\": \"Karim\",\n  \"typeSoignant\": \"AIDE_SOIGNANT\",\n  \"telephone\": \"0682345678\",\n  \"email\": \"karim.mansouri@soins.ma\",\n  \"adresseBase\": \"Clinique Hay Hassani, Casablanca\",\n  \"latitudeBase\": 33.5650,\n  \"longitudeBase\": -7.6350,\n  \"competences\": [\"Pansements\", \"Aide à la mobilité\", \"Surveillance constantes\"],\n  \"capaciteVisitesParJour\": 8\n}"}
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "03 - Optimisation des Tournées",
+      "item": [
+        {
+          "name": "GET Distance Haversine (test GPS)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "const d = pm.response.json();",
+            "pm.test('Distance > 0', () => pm.expect(d).to.be.above(0));",
+            "console.log('Distance =', d, 'km');"
+          ]}}],
+          "request": {
+            "method":"GET",
+            "url": {
+              "raw":"http://localhost:8083/visits/distance?lat1=33.5731&lon1=-7.5898&lat2=33.5900&lon2=-7.6100",
+              "host":["http://localhost:8083"],
+              "path":["visits","distance"],
+              "query":[
+                {"key":"lat1","value":"33.5731"},
+                {"key":"lon1","value":"-7.5898"},
+                {"key":"lat2","value":"33.5900"},
+                {"key":"lon2","value":"-7.6100"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Optimiser tournée Soignant 1 (3 patients)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "const j = pm.response.json();",
+            "pm.test('Route retournée', () => pm.expect(j.caregiverId).to.exist);",
+            "pm.test('Stops non vide', () => pm.expect(j.stops).to.be.an('array').that.is.not.empty);",
+            "console.log('Nombre de stops:', j.stops.length, '| Distance totale:', j.distanceTotaleKm, 'km');"
+          ]}}],
+          "request": {
+            "method":"POST",
+            "url": {
+              "raw":"http://localhost:8083/visits/optimize/{{c1_id}}?date=2026-04-28",
+              "query":[{"key":"date","value":"2026-04-28"}]
+            },
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"[\n  {\n    \"patientId\": {{p1_id}},\n    \"caregiverId\": {{c1_id}},\n    \"date\": \"2026-04-28\",\n    \"heurePreferee\": \"09:00\",\n    \"dureeMinutes\": 30,\n    \"patientLatitude\": 33.5731,\n    \"patientLongitude\": -7.5898,\n    \"typeVisite\": \"Injection insuline\"\n  },\n  {\n    \"patientId\": {{p2_id}},\n    \"caregiverId\": {{c1_id}},\n    \"date\": \"2026-04-28\",\n    \"heurePreferee\": \"10:30\",\n    \"dureeMinutes\": 45,\n    \"patientLatitude\": 33.5900,\n    \"patientLongitude\": -7.6100,\n    \"typeVisite\": \"Pansement post-op\"\n  },\n  {\n    \"patientId\": {{p3_id}},\n    \"caregiverId\": {{c1_id}},\n    \"date\": \"2026-04-28\",\n    \"heurePreferee\": \"11:30\",\n    \"dureeMinutes\": 40,\n    \"patientLatitude\": 33.5600,\n    \"patientLongitude\": -7.5700,\n    \"typeVisite\": \"Surveillance cardiaque\"\n  }\n]"}
+          }
+        },
+        {
+          "name": "POST Optimiser tournée Soignant 2 (2 patients)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "const j = pm.response.json();",
+            "pm.test('Route retournée', () => pm.expect(j.caregiverId).to.exist);",
+            "console.log('Tournée soignant 2 — stops:', j.stops.length);"
+          ]}}],
+          "request": {
+            "method":"POST",
+            "url": {
+              "raw":"http://localhost:8083/visits/optimize/{{c2_id}}?date=2026-04-28",
+              "query":[{"key":"date","value":"2026-04-28"}]
+            },
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"[\n  {\n    \"patientId\": {{p1_id}},\n    \"caregiverId\": {{c2_id}},\n    \"date\": \"2026-04-28\",\n    \"heurePreferee\": \"08:00\",\n    \"dureeMinutes\": 20,\n    \"patientLatitude\": 33.5731,\n    \"patientLongitude\": -7.5898,\n    \"typeVisite\": \"Pansement\"\n  },\n  {\n    \"patientId\": {{p3_id}},\n    \"caregiverId\": {{c2_id}},\n    \"date\": \"2026-04-28\",\n    \"heurePreferee\": \"09:30\",\n    \"dureeMinutes\": 35,\n    \"patientLatitude\": 33.5600,\n    \"patientLongitude\": -7.5700,\n    \"typeVisite\": \"Aide à la mobilité\"\n  }\n]"}
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "04 - Suivi en Temps Réel (Tracking)",
+      "item": [
+        {
+          "name": "POST Créer Visite 1 (Patient1 + Soignant1)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "const j = pm.response.json();",
+            "pm.test('visitId présent', () => pm.expect(j.visitId).to.exist);",
+            "pm.test('Statut PLANIFIEE', () => pm.expect(j.statut).to.equal('PLANIFIEE'));",
+            "pm.collectionVariables.set('v1_id', j.visitId);",
+            "console.log('Visite 1 ID =', j.visitId);"
+          ]}}],
+          "request": {
+            "method":"POST",
+            "url": {
+              "raw":"http://localhost:8084/tracking/visits?patientId={{p1_id}}&caregiverId={{c1_id}}",
+              "query":[
+                {"key":"patientId","value":"{{p1_id}}"},
+                {"key":"caregiverId","value":"{{c1_id}}"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Créer Visite 2 (Patient2 + Soignant1)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "const j = pm.response.json();",
+            "pm.test('visitId présent', () => pm.expect(j.visitId).to.exist);",
+            "pm.collectionVariables.set('v2_id', j.visitId);",
+            "console.log('Visite 2 ID =', j.visitId);"
+          ]}}],
+          "request": {
+            "method":"POST",
+            "url": {
+              "raw":"http://localhost:8084/tracking/visits?patientId={{p2_id}}&caregiverId={{c1_id}}",
+              "query":[
+                {"key":"patientId","value":"{{p2_id}}"},
+                {"key":"caregiverId","value":"{{c1_id}}"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Créer Visite 3 (Patient3 + Soignant2)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "const j = pm.response.json();",
+            "pm.test('visitId présent', () => pm.expect(j.visitId).to.exist);",
+            "pm.collectionVariables.set('v3_id', j.visitId);",
+            "console.log('Visite 3 ID =', j.visitId);"
+          ]}}],
+          "request": {
+            "method":"POST",
+            "url": {
+              "raw":"http://localhost:8084/tracking/visits?patientId={{p3_id}}&caregiverId={{c2_id}}",
+              "query":[
+                {"key":"patientId","value":"{{p3_id}}"},
+                {"key":"caregiverId","value":"{{c2_id}}"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Visites actives (3 attendues)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('3 visites actives', () => pm.expect(pm.response.json().length).to.be.at.least(3));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8084/tracking/visits/active"}
+        },
+        {
+          "name": "PUT Visite 1 → EN_ROUTE",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Statut EN_ROUTE', () => pm.expect(pm.response.json().statut).to.equal('EN_ROUTE'));"
+          ]}}],
+          "request": {
+            "method":"PUT",
+            "url":"http://localhost:8084/tracking/visits/{{v1_id}}/status",
+            "header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"statut\": \"EN_ROUTE\",\n  \"latitude\": 33.5850,\n  \"longitude\": -7.6200\n}"}
+          }
+        },
+        {
+          "name": "PUT Visite 1 → EN_COURS",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Statut EN_COURS', () => pm.expect(pm.response.json().statut).to.equal('EN_COURS'));"
+          ]}}],
+          "request": {
+            "method":"PUT",
+            "url":"http://localhost:8084/tracking/visits/{{v1_id}}/status",
+            "header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"statut\": \"EN_COURS\",\n  \"latitude\": 33.5731,\n  \"longitude\": -7.5898\n}"}
+          }
+        },
+        {
+          "name": "PUT Visite 1 → TERMINEE",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Statut TERMINEE', () => pm.expect(pm.response.json().statut).to.equal('TERMINEE'));"
+          ]}}],
+          "request": {
+            "method":"PUT",
+            "url":"http://localhost:8084/tracking/visits/{{v1_id}}/status",
+            "header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"statut\": \"TERMINEE\",\n  \"notes\": \"Injection insuline effectuée. Glycémie 1.2 g/L, tension 130/80.\"\n}"}
+          }
+        },
+        {
+          "name": "PUT Visite 2 → EN_ROUTE",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));"
+          ]}}],
+          "request": {
+            "method":"PUT",
+            "url":"http://localhost:8084/tracking/visits/{{v2_id}}/status",
+            "header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"statut\": \"EN_ROUTE\",\n  \"latitude\": 33.5850,\n  \"longitude\": -7.6200\n}"}
+          }
+        },
+        {
+          "name": "POST Visite 2 → Signaler incident",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Statut INCIDENT', () => pm.expect(pm.response.json().statut).to.equal('INCIDENT'));"
+          ]}}],
+          "request": {
+            "method":"POST",
+            "url":"http://localhost:8084/tracking/visits/{{v2_id}}/incident",
+            "header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"description\": \"Patient absente lors de la visite. Appel sans réponse. Passage replanifié à 14h.\"\n}"}
+          }
+        },
+        {
+          "name": "PUT Visite 3 → EN_ROUTE",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));"
+          ]}}],
+          "request": {
+            "method":"PUT",
+            "url":"http://localhost:8084/tracking/visits/{{v3_id}}/status",
+            "header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"statut\": \"EN_ROUTE\",\n  \"latitude\": 33.5650,\n  \"longitude\": -7.6350\n}"}
+          }
+        },
+        {
+          "name": "PUT Visite 3 → EN_COURS",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));"
+          ]}}],
+          "request": {
+            "method":"PUT",
+            "url":"http://localhost:8084/tracking/visits/{{v3_id}}/status",
+            "header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"statut\": \"EN_COURS\",\n  \"latitude\": 33.5600,\n  \"longitude\": -7.5700\n}"}
+          }
+        },
+        {
+          "name": "PUT Visite 3 → TERMINEE",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Statut TERMINEE', () => pm.expect(pm.response.json().statut).to.equal('TERMINEE'));"
+          ]}}],
+          "request": {
+            "method":"PUT",
+            "url":"http://localhost:8084/tracking/visits/{{v3_id}}/status",
+            "header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"statut\": \"TERMINEE\",\n  \"notes\": \"Surveillance ECG normale. Prise anticoagulants confirmée.\"\n}"}
+          }
+        },
+        {
+          "name": "GET Statut Visite 1 (vérif TERMINEE)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('TERMINEE', () => pm.expect(pm.response.json().statut).to.equal('TERMINEE'));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8084/tracking/visits/{{v1_id}}"}
+        },
+        {
+          "name": "GET Visites du Soignant 1",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Au moins 2 visites', () => pm.expect(pm.response.json().length).to.be.at.least(2));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8084/tracking/caregivers/{{c1_id}}/visits"}
+        }
+      ]
+    },
+
+    {
+      "name": "05 - Facturation",
+      "item": [
+        {
+          "name": "POST Créer Facture 1 - Benali (Injection insuline)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "const j = pm.response.json();",
+            "pm.test('ID présent', () => pm.expect(j.id).to.exist);",
+            "pm.test('Statut EN_ATTENTE', () => pm.expect(j.statut).to.equal('EN_ATTENTE'));",
+            "pm.collectionVariables.set('b1_id', j.id);",
+            "console.log('Facture 1 ID =', j.id);"
+          ]}}],
+          "request": {
+            "method":"POST",
+            "url":"http://localhost:8085/billing",
+            "header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"patientId\": {{p1_id}},\n  \"caregiverId\": {{c1_id}},\n  \"visitId\": \"{{v1_id}}\",\n  \"dateVisite\": \"2026-04-28\",\n  \"dureeMinutes\": 30,\n  \"typePrestation\": \"Soins infirmiers à domicile - Injection insuline\",\n  \"montantBrut\": 150.00,\n  \"montantPrisEnCharge\": 120.00,\n  \"organismePayeur\": \"CNSS\",\n  \"numeroPriseEnCharge\": \"PC-2026-00123\"\n}"}
+          }
+        },
+        {
+          "name": "POST Créer Facture 2 - El Idrissi (Surveillance cardiaque)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "const j = pm.response.json();",
+            "pm.test('ID présent', () => pm.expect(j.id).to.exist);",
+            "pm.collectionVariables.set('b2_id', j.id);",
+            "console.log('Facture 2 ID =', j.id);"
+          ]}}],
+          "request": {
+            "method":"POST",
+            "url":"http://localhost:8085/billing",
+            "header":[{"key":"Content-Type","value":"application/json"}],
+            "body":{"mode":"raw","raw":"{\n  \"patientId\": {{p3_id}},\n  \"caregiverId\": {{c2_id}},\n  \"visitId\": \"{{v3_id}}\",\n  \"dateVisite\": \"2026-04-28\",\n  \"dureeMinutes\": 40,\n  \"typePrestation\": \"Surveillance cardiaque à domicile - ECG\",\n  \"montantBrut\": 220.00,\n  \"montantPrisEnCharge\": 180.00,\n  \"organismePayeur\": \"RAMED\",\n  \"numeroPriseEnCharge\": \"PC-2026-00456\"\n}"}
+          }
+        },
+        {
+          "name": "GET Lister toutes les factures",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Au moins 2 factures', () => pm.expect(pm.response.json().length).to.be.at.least(2));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8085/billing"}
+        },
+        {
+          "name": "GET Facture 1 par ID",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Facture présente', () => pm.expect(pm.response.json().id).to.exist);"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8085/billing/{{b1_id}}"}
+        },
+        {
+          "name": "PUT Facture 1 → SOUMISE",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Statut SOUMISE', () => pm.expect(pm.response.json().statut).to.equal('SOUMISE'));"
+          ]}}],
+          "request": {
+            "method":"PUT",
+            "url": {
+              "raw":"http://localhost:8085/billing/{{b1_id}}/statut?statut=SOUMISE",
+              "query":[{"key":"statut","value":"SOUMISE"}]
+            }
+          }
+        },
+        {
+          "name": "PUT Facture 1 → VALIDEE",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Statut VALIDEE', () => pm.expect(pm.response.json().statut).to.equal('VALIDEE'));"
+          ]}}],
+          "request": {
+            "method":"PUT",
+            "url": {
+              "raw":"http://localhost:8085/billing/{{b1_id}}/statut?statut=VALIDEE",
+              "query":[{"key":"statut","value":"VALIDEE"}]
+            }
+          }
+        },
+        {
+          "name": "PUT Facture 1 → PAYEE",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Statut PAYEE', () => pm.expect(pm.response.json().statut).to.equal('PAYEE'));"
+          ]}}],
+          "request": {
+            "method":"PUT",
+            "url": {
+              "raw":"http://localhost:8085/billing/{{b1_id}}/statut?statut=PAYEE",
+              "query":[{"key":"statut","value":"PAYEE"}]
+            }
+          }
+        },
+        {
+          "name": "PUT Facture 2 → VALIDEE",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Statut VALIDEE', () => pm.expect(pm.response.json().statut).to.equal('VALIDEE'));"
+          ]}}],
+          "request": {
+            "method":"PUT",
+            "url": {
+              "raw":"http://localhost:8085/billing/{{b2_id}}/statut?statut=VALIDEE",
+              "query":[{"key":"statut","value":"VALIDEE"}]
+            }
+          }
+        },
+        {
+          "name": "GET Factures du Patient 1",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Au moins 1 facture', () => pm.expect(pm.response.json().length).to.be.at.least(1));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8085/billing/patient/{{p1_id}}"}
+        },
+        {
+          "name": "GET Factures du Soignant 1",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "console.log('Factures soignant 1:', pm.response.json().length);"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8085/billing/caregiver/{{c1_id}}"}
+        }
+      ]
+    },
+
+    {
+      "name": "06 - Suppression (nettoyage final)",
+      "item": [
+        {
+          "name": "DELETE Patient 3",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 204', () => pm.response.to.have.status(204));"
+          ]}}],
+          "request": {"method":"DELETE","url":"http://localhost:8081/patients/{{p3_id}}"}
+        },
+        {
+          "name": "GET Patient 3 supprimé (404 attendu)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 404 - Suppression confirmée', () => pm.response.to.have.status(404));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8081/patients/{{p3_id}}"}
+        },
+        {
+          "name": "DELETE Soignant 2",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 204', () => pm.response.to.have.status(204));"
+          ]}}],
+          "request": {"method":"DELETE","url":"http://localhost:8082/caregivers/{{c2_id}}"}
+        },
+        {
+          "name": "GET Soignant 2 supprimé (404 attendu)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":[
+            "pm.test('Status 404 - Suppression confirmée', () => pm.response.to.have.status(404));"
+          ]}}],
+          "request": {"method":"GET","url":"http://localhost:8082/caregivers/{{c2_id}}"}
+        }
+      ]
+    }
+
+  ]
+}

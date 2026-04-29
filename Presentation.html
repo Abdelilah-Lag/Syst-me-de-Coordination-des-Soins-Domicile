@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Projet 6 — Soins à Domicile · ENSAM Rabat · Architecture Microservices</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0a0e17;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* SLIDES CONTAINER */
+  .slides-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease-in-out, visibility 0.4s;
+    overflow-y: auto;
+    background: #ffffff;
+  }
+
+  .slide.active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 10;
+  }
+
+  /* Custom scrollbar */
+  .slide::-webkit-scrollbar {
+    width: 5px;
+  }
+  .slide::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  .slide::-webkit-scrollbar-thumb {
+    background: #1a5f7a;
+    border-radius: 4px;
+  }
+
+  /* Content */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 56px 40px;
+    min-height: calc(100vh - 80px);
+  }
+
+  /* Footer fixe sur chaque slide */
+  .slide-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #0e3b4f;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    padding: 14px 24px;
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+    z-index: 15;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Dots indicator */
+  .dots {
+    position: fixed;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 100;
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(8px);
+    border-radius: 40px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .dot.active {
+    background: #ffffff;
+    width: 28px;
+    border-radius: 4px;
+    box-shadow: 0 0 0 2px rgba(26, 95, 122, 0.3);
+  }
+
+  .dot:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: scale(1.2);
+  }
+
+  /* Typography */
+  .section-tag {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #1a5f7a;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 36px;
+    letter-spacing: -0.01em;
+  }
+  .section-title span { color: #1a5f7a; }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+
+  .card {
+    background: white;
+    border: 1px solid #e9edf2;
+    border-radius: 14px;
+    padding: 22px;
+    transition: all 0.2s;
+  }
+  .card:hover { border-color: #1a5f7a; box-shadow: 0 6px 16px rgba(0,0,0,0.04); }
+  .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: #111827; }
+  .card p { font-size: 0.85rem; color: #4a5a6e; line-height: 1.5; }
+
+  .service-badge {
+    background: #f0f2f5;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.7rem;
+    margin-left: 10px;
+    font-weight: 500;
+    color: #1a5f7a;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #0a6b2e;
+    background: #e6f4ea;
+    padding: 4px 12px;
+    border-radius: 24px;
+    margin-top: 14px;
+  }
+  .status-dot { width: 6px; height: 6px; background: #0a6b2e; border-radius: 50%; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0% { opacity: 0.4; } 100% { opacity: 1; } }
+
+  .mockup-terminal {
+    background: #0f172a;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+  }
+  .terminal-header {
+    background: #1e293b;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .terminal-dot.red { background: #ef4444; }
+  .terminal-dot.yellow { background: #f59e0b; }
+  .terminal-dot.green { background: #22c55e; }
+  .terminal-title {
+    margin-left: 12px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+  .terminal-content {
+    padding: 22px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.7rem;
+    color: #e2e8f0;
+    background: #0f172a;
+    line-height: 1.7;
+  }
+  .terminal-content .highlight { color: #7dd3fc; font-weight: 500; }
+
+  .algo-steps { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 24px; }
+  .step {
+    flex: 1;
+    min-width: 135px;
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #eef2f6;
+  }
+  .step-num { font-family: 'Source Code Pro', monospace; font-weight: 700; color: #1a5f7a; margin-bottom: 8px; font-size: 0.85rem; }
+  .step p { font-size: 0.75rem; color: #4a5a6e; line-height: 1.45; }
+
+  .tech-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+  .tech-item {
+    background: #f0f2f5;
+    border-radius: 8px;
+    padding: 5px 14px;
+    font-size: 0.7rem;
+    font-family: 'Source Code Pro', monospace;
+    font-weight: 500;
+    color: #1e293b;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  th, td { border: 1px solid #e9edf2; padding: 12px 14px; text-align: left; }
+  th { background: #f8fafc; font-weight: 600; color: #1e293b; }
+
+  .hero-slide {
+    background: linear-gradient(135deg, #0c2f40 0%, #155a74 100%);
+    color: white;
+  }
+  .hero-slide .section-title,
+  .hero-slide .section-tag { color: white; }
+  .hero-slide .section-tag { color: #9fd3e8; }
+  .hero-slide .card { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
+  .hero-slide .card h3 { color: white; }
+  .hero-slide .card p { color: rgba(255,255,255,0.7); }
+
+  /* Keyboard hint */
+  .keyboard-hint {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 0.65rem;
+    color: #94a3b8;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-family: 'Source Code Pro', monospace;
+    z-index: 100;
+    letter-spacing: 0.3px;
+  }
+
+  @media (max-width: 750px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .container { padding: 40px 24px; }
+    .dots { bottom: 60px; }
+    .slide-footer { font-size: 0.6rem; padding: 10px 16px; }
+    .keyboard-hint { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="slides-container">
+  <!-- SLIDE 1 - HERO -->
+  <div class="slide hero-slide active" id="slide1">
+    <div class="container" style="display: flex; flex-direction: column; justify-content: center; min-height: calc(100vh - 80px);">
+      <div class="section-tag" style="color: #9fd3e8;">PROJET 6 · ENSAM RABAT · INDIA S4 · 2025/2026</div>
+      <h1 style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; margin-bottom: 20px; letter-spacing: -0.02em;">Système de Coordination<br>des <span style="color: #9fd3e8;">Soins à Domicile</span></h1>
+      <p style="font-size: 1rem; max-width: 580px; color: rgba(255,255,255,0.75); margin-bottom: 50px; line-height: 1.5;">Architecture microservices Spring Boot · Optimisation géographique des tournées · Suivi temps réel · Facturation automatisée</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 36px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 30px;">
+        <div><div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.5px; color:rgba(255,255,255,0.55);">Auteurs</div><div style="font-weight:600;">Costo Aya & Lagribi Abdelilah</div></div>
+        <div><div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.5px; color:rgba(255,255,255,0.55);">Encadrant</div><div style="font-weight:600;">Pr. A. El Qadi</div></div>
+        <div><div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.5px; color:rgba(255,255,255,0.55);">Microservices</div><div style="font-weight:600;">7 services</div></div>
+        <div><div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.5px; color:rgba(255,255,255,0.55);">Bases de données</div><div style="font-weight:600;">3 PostgreSQL (per service)</div></div>
+      </div>
+    </div>
+    <div class="slide-footer">Projet 6 — Système de Coordination des Soins à Domicile | Costo Aya & Lagribi Abdelilah | ENSAM Rabat · INDIA S4 · 2025/2026 | Pr. A. El Qadi</div>
+  </div>
+
+  <!-- SLIDE 2 - CONTEXTE -->
+  <div class="slide" id="slide2">
+    <div class="container">
+      <div class="section-tag">CONTEXTE MÉTIER</div>
+      <h2 class="section-title">Planification intelligente des <span>visites à domicile</span></h2>
+      <div class="grid-2">
+        <div class="card"><h3>Objectif stratégique</h3><p>Optimiser l'organisation des tournées des soignants (infirmiers, aides-soignants) en intégrant les contraintes géographiques, les disponibilités, les compétences cliniques et les préférences horaires des patients.</p></div>
+        <div class="card"><h3>Acteurs du système</h3><p>Patients à domicile · Aidants · Infirmiers libéraux · Coordinateurs de soins · Médecins prescripteurs · Organismes payeurs (CNSS).</p></div>
+        <div class="card"><h3>Architecture distribuée</h3><p>Pattern Database per Service – chaque microservice possède sa propre base PostgreSQL. Indépendance, scalabilité horizontale, résilience.</p></div>
+        <div class="card"><h3>Traçabilité & facturation</h3><p>Suivi temps réel des visites (statuts EN_ROUTE, EN_COURS, TERMINEE), gestion des incidents, génération automatique de factures avec rapprochement CNSS.</p></div>
+      </div>
+    </div>
+    <div class="slide-footer">Projet 6 — Système de Coordination des Soins à Domicile | Costo Aya & Lagribi Abdelilah | ENSAM Rabat · INDIA S4 · 2025/2026 | Pr. A. El Qadi</div>
+  </div>
+
+  <!-- SLIDE 3 - MICROSERVICES -->
+  <div class="slide" id="slide3">
+    <div class="container">
+      <div class="section-tag">INFRASTRUCTURE TECHNIQUE</div>
+      <h2 class="section-title">Microservices <span>Spring Cloud</span></h2>
+      <div class="grid-3">
+        <div class="card"><h3>Eureka Server <span class="service-badge">:8761</span></h3><p>Service Discovery – enregistrement dynamique et découverte de tous les microservices.</p><div class="status"><span class="status-dot"></span> OPÉRATIONNEL</div></div>
+        <div class="card"><h3>API Gateway <span class="service-badge">:8080</span></h3><p>Spring Cloud Gateway – point d'entrée unique, routage réactif, load balancing.</p><div class="status"><span class="status-dot"></span> OPÉRATIONNEL</div></div>
+        <div class="card"><h3>Patient Home <span class="service-badge">:8081</span></h3><p>Gestion des profils patients, géolocalisation, pathologies, dépendance, aidants.</p><div class="status"><span class="status-dot"></span> OPÉRATIONNEL</div></div>
+        <div class="card"><h3>Caregiver Scheduling <span class="service-badge">:8082</span></h3><p>Planification des soignants : compétences, disponibilités, capacité visites/jour.</p><div class="status"><span class="status-dot"></span> OPÉRATIONNEL</div></div>
+        <div class="card"><h3>Visit Optimization <span class="service-badge">:8083</span></h3><p>Algorithme Nearest Neighbor + Haversine – optimisation des tournées O(n²).</p><div class="status"><span class="status-dot"></span> OPÉRATIONNEL</div></div>
+        <div class="card"><h3>Real-Time Tracking <span class="service-badge">:8084</span></h3><p>Suivi GPS, gestion des statuts EN_ROUTE, EN_COURS, TERMINEE, INCIDENT.</p><div class="status"><span class="status-dot"></span> OPÉRATIONNEL</div></div>
+        <div class="card"><h3>Billing Reconciliation <span class="service-badge">:8085</span></h3><p>Facturation, montant brut / pris en charge, validation CNSS, rapprochement.</p><div class="status"><span class="status-dot"></span> OPÉRATIONNEL</div></div>
+      </div>
+    </div>
+    <div class="slide-footer">Projet 6 — Système de Coordination des Soins à Domicile | Costo Aya & Lagribi Abdelilah | ENSAM Rabat · INDIA S4 · 2025/2026 | Pr. A. El Qadi</div>
+  </div>
+
+  <!-- SLIDE 4 - EUREKA DASHBOARD -->
+  <div class="slide" id="slide4">
+    <div class="container">
+      <div class="section-tag">SERVICE DISCOVERY</div>
+      <h2 class="section-title">Eureka Dashboard – <span>instances enregistrées</span></h2>
+      <div class="grid-2">
+        <div class="mockup-terminal">
+          <div class="terminal-header"><div class="terminal-dot red"></div><div class="terminal-dot yellow"></div><div class="terminal-dot green"></div><span class="terminal-title">localhost:8761 — Spring Eureka</span></div>
+          <div class="terminal-content"><span class="highlight">Application</span> | AMIs | Availability Zones | <span class="highlight">Status</span><br><br>API-GATEWAY | n/a (1) | (1) | <span class="highlight">UP</span><br>BILLING-RECONCILIATION | n/a (1) | (1) | <span class="highlight">UP</span><br>CAREGIVER-SCHEDULING | n/a (1) | (1) | <span class="highlight">UP</span><br>PATIENT-HOME-SERVICE | n/a (1) | (1) | <span class="highlight">UP</span></div>
+        </div>
+        <div class="mockup-terminal">
+          <div class="terminal-header"><div class="terminal-dot red"></div><div class="terminal-dot yellow"></div><div class="terminal-dot green"></div><span class="terminal-title">Eureka – General Info</span></div>
+          <div class="terminal-content">REAL-TIME-TRACKING-SERVICE | n/a (1) | (1) | <span class="highlight">UP</span><br>VISIT-OPTIMIZATION-SERVICE | n/a (1) | (1) | <span class="highlight">UP</span><br><br><span class="highlight">total-avail-memory</span> : 92mb<br><span class="highlight">current-memory-usage</span> : 55mb (59%)<br><span class="highlight">num-of-cpus</span> : 8<br><span class="highlight">server-uptime</span> : 00:23</div>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 20px; font-size: 0.75rem; color: #4a5a6e;">✓ 7 microservices enregistrés dynamiquement — tous opérationnels</div>
+    </div>
+    <div class="slide-footer">Projet 6 — Système de Coordination des Soins à Domicile | Costo Aya & Lagribi Abdelilah | ENSAM Rabat · INDIA S4 · 2025/2026 | Pr. A. El Qadi</div>
+  </div>
+
+  <!-- SLIDE 5 - ALGORITHME -->
+  <div class="slide" id="slide5">
+    <div class="container">
+      <div class="section-tag">OPTIMISATION GÉOGRAPHIQUE</div>
+      <h2 class="section-title">Nearest Neighbor + <span>Haversine</span></h2>
+      <div class="grid-2">
+        <div><p style="margin-bottom: 24px; color: #4a5a6e; line-height: 1.6;">Algorithme glouton (greedy) : à chaque itération, le système sélectionne le patient non visité le plus proche du point courant du soignant. La <strong>formule de Haversine</strong> calcule la distance orthodromique entre deux points GPS avec une précision kilométrique.</p><div class="tech-grid"><span class="tech-item">Complexité O(n²)</span><span class="tech-item">5–25 visites/jour</span><span class="tech-item">Distance GPS réelle</span><span class="tech-item">Heure d'arrivée estimée</span></div></div>
+        <div class="algo-steps"><div class="step"><div class="step-num">Étape 1</div><p>Initialisation : départ depuis coordonnées GPS du soignant</p></div><div class="step"><div class="step-num">Étape 2</div><p>Sélection greedy : patient non visité le plus proche</p></div><div class="step"><div class="step-num">Étape 3</div><p>Planification horaire : temps de trajet + durée de soin</p></div><div class="step"><div class="step-num">Étape 4</div><p>Itération jusqu'à couverture complète</p></div><div class="step"><div class="step-num">Étape 5</div><p>Résultat : route optimisée avec distance totale</p></div></div>
+      </div>
+    </div>
+    <div class="slide-footer">Projet 6 — Système de Coordination des Soins à Domicile | Costo Aya & Lagribi Abdelilah | ENSAM Rabat · INDIA S4 · 2025/2026 | Pr. A. El Qadi</div>
+  </div>
+
+  <!-- SLIDE 6 - PIPELINE -->
+  <div class="slide" id="slide6">
+    <div class="container">
+      <div class="section-tag">MÉTHODOLOGIE</div>
+      <h2 class="section-title">Pipeline de <span>développement</span></h2>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead><tr><th>Phase</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1. Analyse & conception</strong></td><td>Diagramme d'architecture, limites des microservices, modèles de données</td></tr>
+            <tr><td><strong>2. Développement</strong></td><td>Spring Boot, couches Controller-Service-Repository, DTO + validation</td></tr>
+            <tr><td><strong>3. Algorithme d'optimisation</strong></td><td>Implémentation Nearest Neighbor avec Haversine</td></tr>
+            <tr><td><strong>4. Conteneurisation</strong></td><td>Dockerfile multi-stage, docker-compose (7 services + 3 bases PostgreSQL)</td></tr>
+            <tr><td><strong>5. Tests & intégration</strong></td><td>Collection Postman, Health checks Actuator, validation Eureka</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <hr style="margin: 28px 0 20px; border: none; border-top: 1px solid #e9edf2;">
+      <div class="section-tag">STACK TECHNIQUE</div>
+      <div class="tech-grid"><span class="tech-item">Spring Boot 3.2</span><span class="tech-item">Spring Cloud Eureka</span><span class="tech-item">Spring Cloud Gateway</span><span class="tech-item">PostgreSQL 15</span><span class="tech-item">Spring Data JPA</span><span class="tech-item">Java 17 LTS</span><span class="tech-item">Docker / Compose</span><span class="tech-item">Postman</span><span class="tech-item">SpringDoc OpenAPI</span><span class="tech-item">Maven 3.9</span></div>
+    </div>
+    <div class="slide-footer">Projet 6 — Système de Coordination des Soins à Domicile | Costo Aya & Lagribi Abdelilah | ENSAM Rabat · INDIA S4 · 2025/2026 | Pr. A. El Qadi</div>
+  </div>
+
+  <!-- SLIDE 7 - GESTION IMPREVUS -->
+  <div class="slide" id="slide7">
+    <div class="container">
+      <div class="section-tag">FONCTIONNALITÉS MÉTIER</div>
+      <h2 class="section-title">Gestion des <span>imprévus</span> & équité de charge</h2>
+      <div class="grid-2">
+        <div class="card"><h3>Signalement d'incident</h3><p>Endpoint <code style="background:#f3f4f6; padding:3px 8px; border-radius:5px; font-family: monospace;">POST /tracking/visits/{id}/incident</code> – changement de statut immédiat (INCIDENT / ANNULEE), traçabilité horodatée.</p></div>
+        <div class="card"><h3>Capacité de visite</h3><p>Attribut <code style="background:#f3f4f6; padding:3px 8px; border-radius:5px; font-family: monospace;">capaciteVisitesParJour</code> limite le nombre de visites par soignant.</p></div>
+        <div class="card"><h3>Contraintes patients</h3><p>Fenêtres horaires préférées, compétences requises, respect des besoins cliniques lors de l'affectation.</p></div>
+        <div class="card"><h3>Facturation CNSS</h3><p>Génération automatique de factures avec montant brut, prise en charge partielle, rapprochement avec organismes payeurs.</p></div>
+      </div>
+    </div>
+    <div class="slide-footer">Projet 6 — Système de Coordination des Soins à Domicile | Costo Aya & Lagribi Abdelilah | ENSAM Rabat · INDIA S4 · 2025/2026 | Pr. A. El Qadi</div>
+  </div>
+</div>
+
+<!-- Dots indicator -->
+<div class="dots" id="dotsContainer"></div>
+<div class="keyboard-hint">←  →  navigation clavier</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsContainer = document.getElementById('dotsContainer');
+  let currentSlide = 0;
+  const totalSlides = slides.length;
+
+  // Create navigation dots
+  for (let i = 0; i < totalSlides; i++) {
+    const dot = document.createElement('div');
+    dot.classList.add('dot');
+    dot.addEventListener('click', () => goToSlide(i));
+    dotsContainer.appendChild(dot);
+  }
+  const dots = document.querySelectorAll('.dot');
+
+  function updateSlides() {
+    slides.forEach((slide, index) => {
+      slide.classList.toggle('active', index === currentSlide);
+    });
+    dots.forEach((dot, index) => {
+      dot.classList.toggle('active', index === currentSlide);
+    });
+  }
+
+  function goToSlide(index) {
+    if (index < 0) index = 0;
+    if (index >= totalSlides) index = totalSlides - 1;
+    currentSlide = index;
+    updateSlides();
+  }
+
+  function nextSlide() { goToSlide(currentSlide + 1); }
+  function prevSlide() { goToSlide(currentSlide - 1); }
+
+  // Keyboard navigation only (no visible arrow buttons)
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') nextSlide();
+    if (e.key === 'ArrowLeft') prevSlide();
+  });
+
+  updateSlides();
+</script>
+</body>
+</html>

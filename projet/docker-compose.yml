@@ -1,0 +1,149 @@
+version: '3.8'
+
+services:
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - soins-network
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_SERVER=http://eureka-server:8761/eureka
+    depends_on:
+      - eureka-server
+    networks:
+      - soins-network
+
+  patient-db:
+    image: postgres:15-alpine
+    container_name: patient-db
+    environment:
+      POSTGRES_DB: patientdb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5432:5432"
+    volumes:
+      - patient-data:/var/lib/postgresql/data
+    networks:
+      - soins-network
+
+  caregiver-db:
+    image: postgres:15-alpine
+    container_name: caregiver-db
+    environment:
+      POSTGRES_DB: caregiverdb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5433:5432"
+    volumes:
+      - caregiver-data:/var/lib/postgresql/data
+    networks:
+      - soins-network
+
+  billing-db:
+    image: postgres:15-alpine
+    container_name: billing-db
+    environment:
+      POSTGRES_DB: billingdb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5434:5432"
+    volumes:
+      - billing-data:/var/lib/postgresql/data
+    networks:
+      - soins-network
+
+  patient-home-service:
+    build: ./patient-home-service
+    container_name: patient-home-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://patient-db:5432/patientdb
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin123
+      - EUREKA_SERVER=http://eureka-server:8761/eureka
+    depends_on:
+      - patient-db
+      - eureka-server
+    networks:
+      - soins-network
+
+  caregiver-scheduling-service:
+    build: ./caregiver-scheduling-service
+    container_name: caregiver-scheduling-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://caregiver-db:5432/caregiverdb
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin123
+      - EUREKA_SERVER=http://eureka-server:8761/eureka
+    depends_on:
+      - caregiver-db
+      - eureka-server
+    networks:
+      - soins-network
+
+  visit-optimization-service:
+    build: ./visit-optimization-service
+    container_name: visit-optimization-service
+    ports:
+      - "8083:8083"
+    environment:
+      - EUREKA_SERVER=http://eureka-server:8761/eureka
+      - PATIENT_SERVICE_URL=http://patient-home-service:8081
+      - CAREGIVER_SERVICE_URL=http://caregiver-scheduling-service:8082
+    depends_on:
+      - eureka-server
+      - patient-home-service
+      - caregiver-scheduling-service
+    networks:
+      - soins-network
+
+  real-time-tracking-service:
+    build: ./real-time-tracking-service
+    container_name: real-time-tracking-service
+    ports:
+      - "8084:8084"
+    environment:
+      - EUREKA_SERVER=http://eureka-server:8761/eureka
+    depends_on:
+      - eureka-server
+    networks:
+      - soins-network
+
+  billing-reconciliation-service:
+    build: ./billing-reconciliation-service
+    container_name: billing-reconciliation-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://billing-db:5432/billingdb
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin123
+      - EUREKA_SERVER=http://eureka-server:8761/eureka
+    depends_on:
+      - billing-db
+      - eureka-server
+    networks:
+      - soins-network
+
+networks:
+  soins-network:
+    driver: bridge
+
+volumes:
+  patient-data:
+  caregiver-data:
+  billing-data:

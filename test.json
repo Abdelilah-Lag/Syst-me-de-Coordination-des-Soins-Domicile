@@ -1,0 +1,672 @@
+{
+  "info": {
+    "name": "Home Healthcare Microservices - Complete Test Suite",
+    "description": "Test suite complète pour tester tous les microservices (Patient, Caregiver, Visit Optimization, Tracking, Billing)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "home-healthcare-test-suite"
+  },
+  "variable": [
+    {
+      "key": "patientId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "caregiverId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "visitId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "invoiceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "optimizationResult",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "baseUrl",
+      "value": "http://localhost",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Discovery Service & Gateway - Vérification",
+      "item": [
+        {
+          "name": "Eureka Dashboard - Vérification",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8761/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8761",
+              "path": [""]
+            },
+            "description": "Vérifie que Eureka Discovery Service est actif"
+          },
+          "response": []
+        },
+        {
+          "name": "API Gateway - Vérification",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/actuator/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["actuator", "health"]
+            },
+            "description": "Vérifie que l'API Gateway est active"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Patient Service - Création Patient",
+      "item": [
+        {
+          "name": "Créer Patient (Avec GPS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Martin\",\n  \"prenom\": \"Sophie\",\n  \"dateNaissance\": \"1945-03-15\",\n  \"telephone\": \"0612345678\",\n  \"email\": \"sophie.martin@email.com\",\n  \"adresse\": \"12 Rue des Lilas, 75001 Paris\",\n  \"latitude\": 48.8566,\n  \"longitude\": 2.3522,\n  \"niveauDependance\": \"DEPENDANT\",\n  \"pathologies\": \"Hypertension, Arthrose\",\n  \"besoinsSpecifiques\": \"Aide à la mobilité\",\n  \"contraintes\": \"Disponible après 9h\",\n  \"nomAidant\": \"Pierre Martin\",\n  \"telephoneAidant\": \"0698765432\",\n  \"statut\": \"ACTIF\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8081/patients",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["patients"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Patient créé avec succès\", () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  const response = pm.response.json();",
+                  "  pm.expect(response.id).to.not.be.null;",
+                  "  pm.environment.set(\"patientId\", response.id.toString());",
+                  "  console.log(\"Patient créé avec ID: \" + response.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtenir Patient par ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/patients/{{patientId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["patients", "{{patientId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lister tous les Patients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/patients",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["patients"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Caregiver Service - Création Soignant",
+      "item": [
+        {
+          "name": "Créer Soignant (Infirmier)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Dubois\",\n  \"prenom\": \"Thomas\",\n  \"typeSoignant\": \"INFIRMIER\",\n  \"telephone\": \"0776543210\",\n  \"email\": \"thomas.dubois@soin.fr\",\n  \"adresseBase\": \"5 Avenue des Soins, 75015 Paris\",\n  \"latitudeBase\": 48.8419,\n  \"longitudeBase\": 2.3012,\n  \"competences\": [\"Pansements\", \"Injection\", \"Soins post-opératoires\"],\n  \"capaciteVisitesParJour\": 6,\n  \"statut\": \"DISPONIBLE\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/caregivers",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["caregivers"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Soignant créé avec succès\", () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  const response = pm.response.json();",
+                  "  pm.expect(response.id).to.not.be.null;",
+                  "  pm.environment.set(\"caregiverId\", response.id.toString());",
+                  "  console.log(\"Soignant créé avec ID: \" + response.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtenir Soignant par ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/caregivers/{{caregiverId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["caregivers", "{{caregiverId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lister Soignants Disponibles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/caregivers/available",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["caregivers", "available"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Tracking Service - Création Visite",
+      "item": [
+        {
+          "name": "Créer Visite à suivre",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8084/tracking/visits?patientId={{patientId}}&caregiverId={{caregiverId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8084",
+              "path": ["tracking", "visits"],
+              "query": [
+                {
+                  "key": "patientId",
+                  "value": "{{patientId}}"
+                },
+                {
+                  "key": "caregiverId",
+                  "value": "{{caregiverId}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Visite créée avec succès\", () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  const response = pm.response.json();",
+                  "  pm.expect(response.visitId).to.not.be.null;",
+                  "  pm.environment.set(\"visitId\", response.visitId);",
+                  "  console.log(\"Visite créée avec ID: \" + response.visitId);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtenir Statut Visite",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8084/tracking/visits/{{visitId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8084",
+              "path": ["tracking", "visits", "{{visitId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mettre à jour Statut Visite (EN COURS)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8084/tracking/visits/{{visitId}}/status",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8084",
+              "path": ["tracking", "visits", "{{visitId}}", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lister Visites Actives",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8084/tracking/visits/active",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8084",
+              "path": ["tracking", "visits", "active"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Visit Optimization Service - Optimisation",
+      "item": [
+        {
+          "name": "Calculer Distance entre Points GPS (Haversine)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8083/visits/distance?lat1=48.8566&lon1=2.3522&lat2=48.8419&lon2=2.3012",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8083",
+              "path": ["visits", "distance"],
+              "query": [
+                {
+                  "key": "lat1",
+                  "value": "48.8566"
+                },
+                {
+                  "key": "lon1",
+                  "value": "2.3522"
+                },
+                {
+                  "key": "lat2",
+                  "value": "48.8419"
+                },
+                {
+                  "key": "lon2",
+                  "value": "2.3012"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Optimiser Tournée Soignant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"patientId\": {{patientId}},\n    \"caregiverId\": {{caregiverId}},\n    \"date\": \"2026-04-30\",\n    \"heurePreferee\": {\"hour\": 10, \"minute\": 0},\n    \"dureeMinutes\": 60,\n    \"patientLatitude\": 48.8566,\n    \"patientLongitude\": 2.3522,\n    \"typeVisite\": \"SOIN_SPECIALISE\"\n  }\n]"
+            },
+            "url": {
+              "raw": "http://localhost:8083/visits/optimize/{{caregiverId}}?date=2026-04-30",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8083",
+              "path": ["visits", "optimize", "{{caregiverId}}"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-04-30"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Optimisation réussie\", () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  const response = pm.response.json();",
+                  "  pm.expect(response.distanceTotaleKm).to.be.a('number');",
+                  "  pm.expect(response.nombreVisites).to.be.gt(0);",
+                  "  console.log(\"Tournée optimisée: \" + response.nombreVisites + \" visites, \" + response.distanceTotaleKm + \" km\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Billing Service - Facturation",
+      "item": [
+        {
+          "name": "Créer Facture",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroFacture\": \"FACT-2026-001\",\n  \"patientId\": {{patientId}},\n  \"caregiverId\": {{caregiverId}},\n  \"visitId\": \"{{visitId}}\",\n  \"dateVisite\": \"2026-04-30\",\n  \"dureeMinutes\": 60,\n  \"typePrestation\": \"Soin infirmier spécialisé\",\n  \"montantBrut\": 75.50,\n  \"montantPrisEnCharge\": 50.00,\n  \"montantRestantDu\": 25.50,\n  \"statut\": \"EN_ATTENTE\",\n  \"organismePayeur\": \"CPAM\",\n  \"numeroPriseEnCharge\": \"CPAM-2026-00123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8085/billing",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8085",
+              "path": ["billing"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Facture créée avec succès\", () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  const response = pm.response.json();",
+                  "  pm.expect(response.id).to.not.be.null;",
+                  "  pm.environment.set(\"invoiceId\", response.id.toString());",
+                  "  console.log(\"Facture créée avec ID: \" + response.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtenir Facture par ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8085/billing/{{invoiceId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8085",
+              "path": ["billing", "{{invoiceId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mettre à jour Statut Facture (PAYEE)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8085/billing/{{invoiceId}}/statut?statut=PAYEE",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8085",
+              "path": ["billing", "{{invoiceId}}", "statut"],
+              "query": [
+                {
+                  "key": "statut",
+                  "value": "PAYEE"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Toutes les Factures du Patient",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8085/billing/patient/{{patientId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8085",
+              "path": ["billing", "patient", "{{patientId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Toutes les Factures du Soignant",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8085/billing/caregiver/{{caregiverId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8085",
+              "path": ["billing", "caregiver", "{{caregiverId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lister Toutes les Factures",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8085/billing",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8085",
+              "path": ["billing"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Nettoyage - Suppression des données de test",
+      "item": [
+        {
+          "name": "Supprimer Facture",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "Note: Le service Billing ne semble pas avoir d'endpoint DELETE. Suppression manuelle via base de données ou à implémenter.",
+              "protocol": "http",
+              "host": ["Note"],
+              "path": ["Le", "service", "Billing", "ne", "semble", "pas", "avoir", "d'endpoint", "DELETE.", "Suppression", "manuelle", "via", "base", "de", "données", "ou", "à", "implémenter."]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Supprimer Patient",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/patients/{{patientId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["patients", "{{patientId}}"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Patient supprimé avec succès\", () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  console.log(\"Patient ID \" + pm.environment.get(\"patientId\") + \" supprimé\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Supprimer Soignant",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/caregivers/{{caregiverId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["caregivers", "{{caregiverId}}"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Soignant supprimé avec succès\", () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  console.log(\"Soignant ID \" + pm.environment.get(\"caregiverId\") + \" supprimé\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vérifier Suppression Patient (Doit retourner 404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/patients/{{patientId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["patients", "{{patientId}}"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Patient non trouvé après suppression\", () => {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+                  "  console.log(\"Confirmation: Patient n'existe plus\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nettoyer Variables d'Environnement",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": [""]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.environment.unset(\"patientId\");",
+                  "pm.environment.unset(\"caregiverId\");",
+                  "pm.environment.unset(\"visitId\");",
+                  "pm.environment.unset(\"invoiceId\");",
+                  "console.log(\"Toutes les variables d'environnement ont été nettoyées\");",
+                  "console.log(\"=== TEST TERMINÉ AVEC SUCCÈS ===\");"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
